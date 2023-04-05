@@ -38,11 +38,7 @@ INSTALLED_APPS = [
     'parser',
 ]
 
-CELERY_BROKER_URL = 'amqp://localhost'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
-CELERY_RESULT_SERIALIZER = 'json'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
