@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -29,13 +27,21 @@ def login(driver):
     password_input.send_keys(Keys.ENTER)
 
     # здесь будет логин
-    return HttpResponse("Открыли страницу")
 
 
 def search_settings(driver):
     time.sleep(1)
-    frame1 = driver.find_element(By.XPATH, '/html/body/table/tbody/tr[2]/td/table/tbody/tr[1]')
-    print(frame1)
+    driver.find_element(By.TAG_NAME,"body").send_keys(Keys.END)
+    form = driver.find_element(By.XPATH, '//*[@id="workarea-content"]/div/form')
+    print(form.get_attribute("innerHTML"))
+    form.submit()
+    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
+    frame1 = driver.find_element(By.XPATH, '//*[@id="workarea-content"]/div')
+    print(frame1.get_attribute("innerHTML"))
+    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
+    time.sleep(5)
+    frame2 = frame1.find_element(By.ID, 'appframe_layout_d0be2233473051e2b0a6c270af65f3f4')
+    print("frame2", frame2)
     frame = driver.find_element(By.ID, 'appframe_6d912e81286b9e7602ff7e09f69a3ee1')
 
     time.sleep(10)
@@ -56,7 +62,7 @@ def search_settings(driver):
     partnership_input.value = "B24"'''
 
 
-def index(request):
+def main():
     chrome_options = Options()
     # неробот
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -68,6 +74,4 @@ def index(request):
     time.sleep(5)
 
 
-    return render(request, "parser/index.html")
-
-
+main()
