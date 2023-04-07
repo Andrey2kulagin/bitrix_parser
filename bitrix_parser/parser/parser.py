@@ -7,6 +7,7 @@ import asyncio
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import pymorphy3
 
 
 # Create your views here.
@@ -30,36 +31,58 @@ def login(driver):
 
 
 def search_settings(driver):
-    time.sleep(1)
-    driver.find_element(By.TAG_NAME,"body").send_keys(Keys.END)
-    form = driver.find_element(By.XPATH, '//*[@id="workarea-content"]/div/form')
-    print(form.get_attribute("innerHTML"))
-    form.submit()
-    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
-    frame1 = driver.find_element(By.XPATH, '//*[@id="workarea-content"]/div')
-    print(frame1.get_attribute("innerHTML"))
-    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
     time.sleep(5)
-    frame2 = frame1.find_element(By.ID, 'appframe_layout_d0be2233473051e2b0a6c270af65f3f4')
-    print("frame2", frame2)
-    frame = driver.find_element(By.ID, 'appframe_6d912e81286b9e7602ff7e09f69a3ee1')
+    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
+    frame1 = driver.find_element(By.XPATH, '//*[@id="workarea-content"]/div/div/iframe')
+    driver.switch_to.frame(frame1)
+    frame2 = driver.find_element(By.CSS_SELECTOR, ".partner-application-install-select-country-iframe")
+    driver.switch_to.frame(frame2)
+    driver.find_element(By.CSS_SELECTOR, ".partner-application-b24-list-filter-cnr").click()
+    div_with_form = driver.find_element(By.CSS_SELECTOR, 'div.main-ui-control.main-ui-select[data-name="PARTNERSHIP"]')
+    div_with_form.click()
+    time.sleep(2)
+    print(div_with_form.get_attribute("innerHTML"))
 
-    time.sleep(10)
-    print(frame.get_attribute("innerHTML"))
-    #driver.switch_to.frame(frame)
-    #partnership_block = driver.find_element(By.ID, "b24_partner_application_filter_search")
-    '''partnership_block = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "execute"))
-    )'''
-    time.sleep(1)
-   # partnership_block.click()
-    '''partnership_block = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, ".main-ui-control.main-ui-select[data-name='PARTNERSHIP']"))
-    )
-    time.sleep(1)
-    partnership_block.click()'''
-    '''partnership_input = partnership_block.find_element(By.CSS_SELECTOR, ".main-ui-square-search-item")
-    partnership_input.value = "B24"'''
+    item = div_with_form.find_element(By.XPATH,
+                                      '//*[contains(@class, "main-ui-select-inner-item-element") and text()="Битрикс24"]')
+    print(item.get_attribute("innerHTML"))
+    item.click()
+    print("Значения установлены")
+    button = driver.find_element(By.CSS_SELECTOR,
+                                 ".ui-btn.ui-btn-primary.ui-btn-icon-search.main-ui-filter-field-button.main-ui-filter-find")
+    print(button.get_attribute("innerHTML"))
+    time.sleep(3)
+    button.click()
+
+
+def applications_analyze(driver):
+    time.sleep(3)
+    applications = driver.find_elements(By.CSS_SELECTOR, ".main-grid-row.main-grid-row-body")
+    for application in applications:
+        # print(application.get_attribute("innerHTML"))
+        describtion = application.find_element(By.CSS_SELECTOR,
+                                               ".main-grid-cell-inner")
+        print(describtion.text, '\n\n')
+        buttons = application.find_elements(By.CSS_SELECTOR,
+                                           ".partner-application-b24-list-item-submit-link.js-partner-submit-application")
+        #if len(buttons) == 0 or is_contains_stop_words(describtion.text, ['сети']):
+            #continue
+       # buttons[0].click()
+        if is_contains_stop_words(describtion.text, ['сети']):
+            continue
+        else:
+            print(describtion.text)
+
+def is_contains_stop_words(string: str, stop_words: list):
+    inf_stop_words = []
+    morph = pymorphy3.MorphAnalyzer(lang='ru')
+    for stop_word in stop_words:
+        inf_stop_words.append(morph.parse(stop_word)[0].normal_form)
+    for word in string.split():
+        inf_word = morph.parse(word)[0].normal_form
+        if inf_word in inf_stop_words:
+            return True
+    return False
 
 
 def main():
@@ -71,6 +94,7 @@ def main():
     driver = webdriver.Chrome(options=chrome_options)
     login(driver)
     search_settings(driver)
+    applications_analyze(driver)
     time.sleep(5)
 
 
