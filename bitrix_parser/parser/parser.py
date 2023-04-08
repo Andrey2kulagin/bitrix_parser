@@ -12,6 +12,7 @@ import pymorphy3
 
 # Create your views here.
 def login(driver):
+    print("Начало логина")
     driver.get("https://mp24.bitrix24.ru/marketplace/app/10/")
     people_login = 'anoxinconsult@mail.ru'
     people_password = '1qazxcde32WSX'
@@ -19,6 +20,7 @@ def login(driver):
         EC.presence_of_element_located((By.ID, "login"))
     )
     login_input.send_keys(people_login)
+    print("вставлен логин")
     time.sleep(1)
     login_input.send_keys(Keys.ENTER)
     password_input = WebDriverWait(driver, 10).until(
@@ -26,6 +28,7 @@ def login(driver):
     )
     password_input.send_keys(people_password)
     password_input.send_keys(Keys.ENTER)
+    print("вставлен пароль")
 
     # здесь будет логин
 
@@ -37,6 +40,8 @@ def search_settings(driver):
     driver.switch_to.frame(frame1)
     frame2 = driver.find_element(By.CSS_SELECTOR, ".partner-application-install-select-country-iframe")
     driver.switch_to.frame(frame2)
+    print("перешло на нужный фрейм")
+    time.sleep(5)
     driver.find_element(By.CSS_SELECTOR, ".partner-application-b24-list-filter-cnr").click()
     div_with_form = driver.find_element(By.CSS_SELECTOR, 'div.main-ui-control.main-ui-select[data-name="PARTNERSHIP"]')
     div_with_form.click()
@@ -88,10 +93,14 @@ def is_contains_stop_words(string: str, stop_words: list):
 def main():
     chrome_options = Options()
     # неробот
+    print("Установка настроек")
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--disable-gpu')
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
     # chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(options=chrome_options)
+    print("Настройки установлены")
     login(driver)
     search_settings(driver)
     applications_analyze(driver)
