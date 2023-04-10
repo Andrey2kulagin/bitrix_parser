@@ -1,11 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<button >Начать работу</button>
-
-</body>
-</html>
+{% extends 'parser/base.html' %}
+{% block title %}
+<title>Главная страница</title>
+{% endblock %}
+{% block content %}
+{% if request.is_auth %}
+<div>
+    {% if stop_words %}
+    {% for stop_word in stop_words %}
+    {{stop_word.word}}
+    {% endfor %}
+    {% else %}
+    <p>Вы пока не добавили стоп-слов</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ stop_words_form }}
+        <button type="submit">Добавить</button>
+    </form>
+</div>
+<form method="post">
+            {% csrf_token %}
+    {{ BitrixAccountDataForm }}
+    <button type="submit">Отправить измененные данные на проверку</button>
+</form>
+<div>
+    <form method="post">
+        {% csrf_token %}
+        {{refresh_interval_form}}
+        <button type="submit">Сохранить</button>
+    </form>
+</div>
+{% else %}
+<h1>Введите данные для авторизации</h1>
+<form method="post">
+            {% csrf_token %}
+    {{ BitrixAccountDataForm }}
+    <input type="hidden" value="account_type">
+    <button type="submit">Отправить на проверку</button>
+</form>
+{% endif %}
+{% endblock %}

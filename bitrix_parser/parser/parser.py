@@ -11,11 +11,9 @@ import pymorphy3
 
 
 # Create your views here.
-def login(driver):
+def login(driver, people_login, people_password):
     print("Начало логина")
     driver.get("https://mp24.bitrix24.ru/marketplace/app/10/")
-    people_login = 'anoxinconsult@mail.ru'
-    people_password = '1qazxcde32WSX'
     login_input = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, "login"))
     )
@@ -23,14 +21,32 @@ def login(driver):
     print("вставлен логин")
     time.sleep(1)
     login_input.send_keys(Keys.ENTER)
+    if len(driver.find_elements(By.CSS_SELECTOR, ".b24-network-auth-form-field-error-wrap")) != 0:
+        return False
     password_input = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, "password"))
     )
     password_input.send_keys(people_password)
     password_input.send_keys(Keys.ENTER)
     print("вставлен пароль")
+    if len(driver.find_elements(By.CSS_SELECTOR, ".b24-network-auth-form-field-error-wrap")) != 0:
+        return False
+    return True
 
-    # здесь будет логин
+
+def check_account(people_login, people_password):
+    chrome_options = Options()
+    # неробот
+    print("Установка настроек")
+    # chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    # chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(options=chrome_options)
+    result = login(driver, people_login, people_password)
+    driver.quit()
+    return result
 
 
 def search_settings(driver):
@@ -82,7 +98,7 @@ def applications_analyze(driver):
                                                ".main-grid-cell-inner")
         try:
             buttons = application.find_elements(By.CSS_SELECTOR,
-                                           ".partner-application-b24-list-item-submit-link.js-partner-submit-application")
+                                                ".partner-application-b24-list-item-submit-link.js-partner-submit-application")
         except:
             buttons = []
         if len(buttons) == 0 or is_contains_stop_words(describtion.text, ['сети']):
@@ -90,7 +106,6 @@ def applications_analyze(driver):
         buttons[0].click()
         print("Кликнули на нужную кнопку")
         return True
-
 
 
 def is_contains_stop_words(string: str, stop_words: list):
@@ -112,7 +127,7 @@ def refresh(driver):
     refresh_button.click()
 
 
-def main():
+def main(people_login, people_password):
     chrome_options = Options()
     # неробот
     print("Установка настроек")
@@ -123,13 +138,14 @@ def main():
     # chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(options=chrome_options)
     print("Настройки установлены")
-    login(driver)
+    login(driver,people_login, people_password)
     search_settings(driver)
     applications_analyze(driver)
     time.sleep(5)
     refresh(driver)
     print("Перезагрузили")
     time.sleep(5)
+    driver.quit()
 
 
 main()
