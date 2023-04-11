@@ -1,13 +1,21 @@
 {% extends 'parser/base.html' %}
 {% block title %}
+{% load static %}
 <title>Главная страница</title>
 {% endblock %}
 {% block content %}
-{% if request.is_auth %}
+{% if request.user.is_auth %}
 <div>
+
+    <div class="login_div stop_words">
+
+    </div>
+<div class="login_div stop_words">
     {% if stop_words %}
     {% for stop_word in stop_words %}
-    {{stop_word.word}}
+    <span class="bitrix_header" style="width:300px;  display: flex; padding-left: 80px; ">{{stop_word.word}}
+        <form method="post" style=" display: flex; padding-left: 75px;">{% csrf_token %} <input name="form_type" type="hidden" value="del_stop_words"> <input type="hidden" name="stop_word" value="{{stop_word.id}}"> <button type="submit">Удалить</button>
+        </form></span>
     {% endfor %}
     {% else %}
     <p>Вы пока не добавили стоп-слов</p>
@@ -15,28 +23,28 @@
     <form method="post">
         {% csrf_token %}
         {{ stop_words_form }}
-        <button type="submit">Добавить</button>
+        <input name="form_type" type="hidden" value="stop_words">
+        <button type="submit" class="standart__button">Добавить</button>
     </form>
 </div>
+    <div class="login_div bitrix_data">
+        <p class="bitrix_header">Данные для входа в bitrix</p>
 <form method="post">
             {% csrf_token %}
     {{ BitrixAccountDataForm }}
-    <button type="submit">Отправить измененные данные на проверку</button>
+    <button type="submit" class="standart__button">Отправить</button>
+    <input name="form_type" type="hidden" value="bitrix_data">
 </form>
-<div>
+        </div>
+<div class="login_div interval_data">
+    <p class="bitrix_header">Интервал</p>
     <form method="post">
         {% csrf_token %}
+        <input name="form_type" type="hidden" value="interval_data">
         {{refresh_interval_form}}
-        <button type="submit">Сохранить</button>
+        <button type="submit" class="standart__button">Сохранить</button>
     </form>
 </div>
-{% else %}
-<h1>Введите данные для авторизации</h1>
-<form method="post">
-            {% csrf_token %}
-    {{ BitrixAccountDataForm }}
-    <input type="hidden" value="account_type">
-    <button type="submit">Отправить на проверку</button>
-</form>
+    </div>
 {% endif %}
 {% endblock %}

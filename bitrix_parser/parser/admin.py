@@ -25,7 +25,7 @@ class MyUserAdmin(UserAdmin):
                      None,
                      {
                          'fields': (
-                             "subscription", "activation_date",
+                             "subscription", "activation_date", "is_auth",
                              "subscription_days",
                              "end_of_subscription")}
                  ),

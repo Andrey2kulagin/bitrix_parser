@@ -8,6 +8,7 @@ import asyncio
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pymorphy3
+import random
 
 
 # Create your views here.
@@ -34,7 +35,7 @@ def login(driver, people_login, people_password):
     return True
 
 
-def check_account(people_login, people_password):
+def is_account_data_valid(people_login, people_password):
     chrome_options = Options()
     # неробот
     print("Установка настроек")
@@ -87,21 +88,20 @@ def search_settings(driver):
     find_button.click()
 
 
-def applications_analyze(driver):
-    time.sleep(3)
+def applications_analyze(driver, stop_words: list):
     applications = WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".main-grid-row.main-grid-row-body"))
     )
     for application in applications:
         # print(application.get_attribute("innerHTML"))
-        describtion = application.find_element(By.CSS_SELECTOR,
+        description = application.find_element(By.CSS_SELECTOR,
                                                ".main-grid-cell-inner")
         try:
             buttons = application.find_elements(By.CSS_SELECTOR,
                                                 ".partner-application-b24-list-item-submit-link.js-partner-submit-application")
         except:
             buttons = []
-        if len(buttons) == 0 or is_contains_stop_words(describtion.text, ['сети']):
+        if len(buttons) == 0 and is_contains_stop_words(description.text, stop_words):
             continue
         buttons[0].click()
         print("Кликнули на нужную кнопку")
@@ -127,7 +127,7 @@ def refresh(driver):
     refresh_button.click()
 
 
-def main(people_login, people_password):
+def main(people_login: str, people_password: str, interval_start: int, interval_end: int, stop_words: list):
     chrome_options = Options()
     # неробот
     print("Установка настроек")
@@ -140,12 +140,17 @@ def main(people_login, people_password):
     print("Настройки установлены")
     login(driver,people_login, people_password)
     search_settings(driver)
-    applications_analyze(driver)
-    time.sleep(5)
-    refresh(driver)
+    applications_analyze(driver, stop_words)
+    while True:
+        refresh_interval = random.randint(interval_start, interval_end)
+        print("Ждём")
+        time.sleep(refresh_interval)
+        refresh(driver)
+        print("Перезагрузили")
+        if applications_analyze(driver, stop_words):
+            #Получить сколько ждать, и ждать это время:
+            break
     print("Перезагрузили")
     time.sleep(5)
     driver.quit()
 
-
-main()

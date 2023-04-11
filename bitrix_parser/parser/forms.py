@@ -8,7 +8,7 @@ class RefreshIntervalForm(forms.ModelForm):
                                 attrs={"class": "name_input", "type": "number", "min": 1}))
     end = forms.CharField(max_length=200, label="До (сек.)",
                           widget=forms.NumberInput(
-                              attrs={"class": "name_input", "type": "number", "min": 1}))
+                              attrs={"class": "name_input", "type": "number", "min": 5}))
 
     class Meta:
         model = RefreshInterval
