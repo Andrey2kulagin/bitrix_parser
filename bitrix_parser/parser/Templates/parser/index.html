@@ -8,7 +8,11 @@
 <div>
 
     <div class="login_div stop_words">
-
+        <form method="post">
+        {% csrf_token %}
+        <input name="form_type" type="hidden" value="parser_start">
+        <button type="submit" class="standart__button">Старт</button>
+    </form>
     </div>
 <div class="login_div stop_words">
     {% if stop_words %}

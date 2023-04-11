@@ -8,6 +8,7 @@ from .forms import StopWordsForm, RefreshIntervalForm, BitrixAccountDataForm
 from .models import User, StopWords, RefreshInterval, BitrixAccountData
 from .parser import is_account_data_valid
 from django.shortcuts import redirect
+from .tasks import my_func_run
 
 
 @login_required(login_url='login')
@@ -46,6 +47,8 @@ def index_post_processing(request):
         add_change_refresh_interval(request)
     if name == "del_stop_words":
         del_stop_word(request)
+    if name == "parser_start":
+        start_parser(request)
 
 
 @login_required(login_url='login')
@@ -81,6 +84,7 @@ def start_parser(request):
         interval_end = interval.end
         bitrix_login = bitrix_data.login
         bitrix_password = bitrix_data.password
+        my_func_run.delay(bitrix_login, bitrix_password, interval_start, interval_end, stop_words)
 
 
 class MyLoginView(LoginView):

@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.common import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
@@ -89,23 +90,38 @@ def search_settings(driver):
 
 
 def applications_analyze(driver, stop_words: list):
+    time.sleep(5)
     applications = WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".main-grid-row.main-grid-row-body"))
     )
+
     for application in applications:
+        if application.get_attribute('hidden') == True:
+            print("HIIIIDN")
+            continue
         # print(application.get_attribute("innerHTML"))
-        description = application.find_element(By.CSS_SELECTOR,
-                                               ".main-grid-cell-inner")
+        description = None
+        while True:
+            try:
+                description = application.find_element(By.CSS_SELECTOR,
+                                                       ".main-grid-cell-content")
+                print(description.get_attribute("innerHTML"))
+                break
+            except StaleElementReferenceException:
+                print("Опять ошибка")
+                continue
+
         try:
             buttons = application.find_elements(By.CSS_SELECTOR,
                                                 ".partner-application-b24-list-item-submit-link.js-partner-submit-application")
         except:
             buttons = []
-        if len(buttons) == 0 and is_contains_stop_words(description.text, stop_words):
+        if len(buttons) == 0 or is_contains_stop_words(description.text, stop_words):
             continue
-        buttons[0].click()
-        print("Кликнули на нужную кнопку")
-        return True
+        else:
+            buttons[0].click()
+            print("Кликнули на нужную кнопку")
+            return True
 
 
 def is_contains_stop_words(string: str, stop_words: list):
@@ -154,3 +170,6 @@ def main(people_login: str, people_password: str, interval_start: int, interval_
     time.sleep(5)
     driver.quit()
 
+
+if __name__ == "__main__":
+    main("anoxinconsult@mail.ru","1qazxcde32WSX", 15, 78,[])
